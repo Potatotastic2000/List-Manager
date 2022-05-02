@@ -1,51 +1,93 @@
-UserLists = [["red", "blue", "yellow"], ['square', 'tringle', 'circle']]
-ListNames = ["colors", "shapes"]
 
-#repeat: "yes" or "no"
-#options: create a list of options or type "StringInput" or "IntegerInput" and have just one action
-#actions: create a list of functions with a corresponding index to the options list
-#exitcode (optional): create a string that will be used to stop the loop
-def edit_list(repeat, options, actions, SelectedList, ListSelection, exitcode="*********************"):
-    new_list = []
+UserLists = []
+ListNames = []
+
+
+def edit_list(repeat, options, actions, SelectedList, ListSelection, exitcode="Exit"):
+    new_list = SelectedList
     choosing = True
     while choosing:
+        print("Type 'add' or 'delete'. Type 'done' when you are finished editing")
         userchoice = input("> ")
-        if userchoice == exitcode:
+        if userchoice == exitcode and repeat == "yes":
             choosing = False
         else:
-            if options.__contains__(userchoice.lower):
-                new_list = actions[options.index(userchoice.lower)]((SelectedList, ListSelection))
-
-                #if repeat is set to no, the user is done choosing once they have selected an option
-                if repeat == "no":
-                    choosing = False
+            if options.__contains__(userchoice.lower()):
+                new_list = actions[options.index(userchoice.lower())]((SelectedList, ListSelection))
             else:
                 print("")
-                print("(", userchoice, ")", "is not a valid option")
-                print("please type one of these options: ", options, "or type", exitcode)
+                print("(!)  (", userchoice, ")", "is not a valid option")
+                if repeat.lower() == "yes":
+                    print("please type one of these options: ", options, "or type", exitcode)
+                if repeat.lower() == "no":
+                    print("please type one of these options: ", options)
     return new_list
 
-def user_choice(repeat, options, actions="", exitcode="*********************"):
+'''
+████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
+
+██╗░░░██╗░██████╗███████╗██████╗░       ░█████╗░██╗░░██╗░█████╗░██╗░█████╗░███████╗░░██╗██╗░░
+██║░░░██║██╔════╝██╔════╝██╔══██╗       ██╔══██╗██║░░██║██╔══██╗██║██╔══██╗██╔════╝░██╔╝╚██╗░
+██║░░░██║╚█████╗░█████╗░░██████╔╝       ██║░░╚═╝███████║██║░░██║██║██║░░╚═╝█████╗░░██╔╝░░╚██╗
+██║░░░██║░╚═══██╗██╔══╝░░██╔══██╗       ██║░░██╗██╔══██║██║░░██║██║██║░░██╗██╔══╝░░╚██╗░░██╔╝
+╚██████╔╝██████╔╝███████╗██║░░██║       ╚█████╔╝██║░░██║╚█████╔╝██║╚█████╔╝███████╗░╚██╗██╔╝░
+░╚═════╝░╚═════╝░╚══════╝╚═╝░░╚═╝       ░╚════╝░╚═╝░░╚═╝░╚════╝░╚═╝░╚════╝░╚══════╝░░╚═╝╚═╝░░
+'''
+
+
+
+#        -----------PARAMETERS-------------
+
+#repeat: "yes" or "no"
+#options: create a list of options with a corresponding 'actions' index to run a function when they choose an option or type "StringInput" to return the users input
+#actions: create a list of functions with a corresponding index to the options list
+#exitcode (optional): create a string that will be used to stop the loop
+
+def user_choice(repeat, options, actions=[], exitcode="Exit"):
     choosing = True
     while choosing:
         userchoice = input("> ")
-        if userchoice == exitcode:
+
+        #check to see if the user has entered the exit code and stop wants to stop choosing
+        if userchoice == exitcode and repeat == "yes":
             choosing = False
+
+#           ----------RUN SPECIFIED ACTION------------
+
         else:
-            if options.__contains__(userchoice):
-                actions[options.index(userchoice)]()
-                #if repeat is set to no, the user is done choosing once they have selected an option
-                if repeat == "no":
-                      choosing = False
-            elif options == "NewList":
-                ListNames.append(userchoice)
-                UserLists.append([])
-                SelectedList = (UserLists[ListNames.index(userchoice)])
-                addItem((SelectedList))
+            if options != "StringInput" and options != "IntegerInput":
+                #try to run the specified action corresponding to the options provided
+                if options.__contains__(userchoice.lower()):
+                    actions[options.index(userchoice)]()
+
+                    #if the action runs and repeat is set to no, the user is done choosing an option once they have selected one
+                    if repeat == "no":
+                          choosing = False
+
+#              ---------INVALID INPUT-----------
+
+                else:
+                    print("")
+                    # inform the user that they have entered something wrong and remind them of the options and exit code
+                    print("(!)  (", userchoice, ")", "is not a valid option")
+                    if repeat.lower() == "yes":
+                        print("please type one of these options: ", options, "or type", exitcode)
+                    if repeat.lower() == "no":
+                        print("please type one of these options: ", options)
+
+#            ---------STRING INPUT-------------
             else:
-                print("")
-                print("(", userchoice, ")", "is not a valid option")
-                print("please type one of these options: ", options, "or type", exitcode)
+                if options == "StringInput":
+                    #make sure the user didn't put blank space
+                    if userchoice.isspace() == False and userchoice != "":
+                        return userchoice
+                    else:
+                        print("(!) You must provide text here ")
+                        create_menu()
+
+'''
+████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
+'''
 
 
 def printlist(SelectedList):
@@ -67,9 +109,10 @@ def addItem(parametertuple):
         if newitem != "!exit":
             print("added!")
             SelectedList.append(newitem)
-    print("Here is the new list: ", SelectedList)
+    if SelectedList[0] == "placeholder":
+        SelectedList.pop(0)
+    print("\nHere is the new list: ", SelectedList)
     print("")
-    print("Type 'add' or 'delete'. Type 'done' when you are finished editing")
     return SelectedList
 
 
@@ -86,20 +129,23 @@ def deleteItem(parametertuple):
         try:
             if (int(itemselection) > 0) and (int(itemselection) <= len(SelectedList)) and (
                     len(SelectedList) >= 1):
+
+                #delete the list if the last item is deleted
                 if len(SelectedList) == 1:
                     print("")
+                    #warn the user of their actions
                     print(
                         "You are attempting to delete the last item in this list, doing so will delete the list entirely. Are you sure you wish to continue?")
                     print("Type 'yes' or 'no'")
                     confirming = True
                     while confirming:
                         userconfirm = input("> ")
-                        if userconfirm == userconfirm.lower() == "yes":
+                        if userconfirm.lower() == "yes":
                             UserLists.pop(ListNames.index(ListSelection))
                             ListNames.pop(ListNames.index(ListSelection))
                             edit_menu()
                             confirming = False
-                        elif userconfirm == "no" or "No":
+                        elif userconfirm.lower() == "no":
                             confirming = False
                             edit_menu()
                         else:
@@ -117,7 +163,6 @@ def deleteItem(parametertuple):
                 deleting = False
             else:
                 print("(", itemselection, ")", "is not a valid input")
-    print("Type 'add' or 'delete'. Type 'done' when you are finished editing")
     return SelectedList
 
 
@@ -138,7 +183,9 @@ def deleteItem(parametertuple):
 
 
 
-
+def exit_menu():
+    print("\nThank you for using List Maker!")
+    exit(0)
 
 '''
 ████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
@@ -153,7 +200,29 @@ def deleteItem(parametertuple):
 
 
 
+def delete_menu():
+    print("Here are your current lists: ")
+    print(ListNames)
+    print("")
 
+    # user selects the list they want to delete
+    print("Which list would you like to delete? ")
+    print("Type the name of the list or type '!exit' to go back ")
+    ListSelection = input("> ")
+    if ListSelection == "!exit":
+        print("")
+        options_menu()
+    try:
+        SelectedList = (UserLists[ListNames.index(ListSelection)])
+    except:
+        print("\n\n\n(!) This list does not exist\n")
+        delete_menu()
+        return
+    UserLists.pop(UserLists.index(SelectedList))
+    ListNames.pop(ListNames.index(ListSelection))
+    print("Deleted!")
+    print("")
+    options_menu()
 
 '''
 ████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
@@ -175,6 +244,9 @@ def deleteItem(parametertuple):
 ╚══════╝╚═════╝░╚═╝░░░╚═╝░░░        ╚═╝░░░░░╚═╝╚══════╝╚═╝░░╚══╝░╚═════╝░
 '''
 
+#TODO: There is no way to edit the name of a list
+#TODO: User is stuck in the menu if there is no list to select
+
 def edit_menu():
     print("Here are your current lists: ")
     print(ListNames)
@@ -191,7 +263,7 @@ def edit_menu():
     print(str(ListSelection) + ":", SelectedList)
     print("")
 
-    print("Type 'add' or 'delete'. Type 'done' when you are finished editing")
+
     SelectedList = edit_list("yes", ["add", "delete"], [addItem, deleteItem], SelectedList, ListSelection, "done")
     print("Here is the new list: ", SelectedList)
 
@@ -218,11 +290,21 @@ def edit_menu():
 '''
 
 
+
 def create_menu():
     print("\nName your new list: ")
-    user_choice("no", "NewList")
-    print("Add some items to your List: ")
-
+    newlist = user_choice("no", "StringInput")
+    for x in ListNames:
+        if x == newlist:
+            print("(!) You already have a list named", "(", newlist, ")")
+            create_menu()
+    ListNames.append(newlist)
+    UserLists.append(["placeholder"])
+    SelectedList = (UserLists[ListNames.index(newlist)])
+    ListSelection = newlist
+    print("\n\nAdd some items to this list:")
+    addItem((SelectedList, ListSelection))
+    options_menu()
 '''
 ████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
 '''
@@ -245,7 +327,23 @@ def create_menu():
 
 
 
+def view_menu():
+    print("Here are your current lists: ")
+    print(ListNames)
+    print("")
 
+    # user selects the list they want to view
+    ListSelection = input("Which list would you like to view? ")
+    try:
+        SelectedList = (UserLists[ListNames.index(ListSelection)])
+    except:
+        print("\n\n\n(!) This list does not exist\n")
+        view_menu()
+        return
+    print("\n\n\n\n")
+    print(str(ListSelection) + ":", SelectedList)
+    print("")
+    options_menu()
 
 '''
 ████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
@@ -270,7 +368,7 @@ def create_menu():
 
 
 def options_menu():
-    print("Here are a list of commands you can use:")
+    print("Here is a list of commands you can use:")
     print("")
     print("View: view a list")
     print("Create: create a new list")
@@ -279,7 +377,7 @@ def options_menu():
     print("Exit: exit the program")
     print("")
     print("")
- #   user_choice("yes", ["View", "Create", "Edit", "Delete", "Exit"], [view_menu])
+    user_choice("no", ["view", "create", "edit", "delete", "exit"], [view_menu, create_menu, edit_menu, delete_menu, exit_menu])
 
 '''
 ████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
